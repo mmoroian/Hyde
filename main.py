@@ -31,12 +31,13 @@ game_map = [[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [6, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0],
             [6, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0],
             [6, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0],
-            [6, 0, 0, 3, 0, 9, 0, 0, 9, 0, 0],
-            [6, 0, 0, 3, 0, 9, 0, 0, 9, 0, 0],
-            [6, 0, 0, 6, 0, 9, 0, 0, 9, 0, 0],
+            [6, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0],
+            [6, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0],
+            [6, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1]]
 
 player_img = pygame.image.load("man.png")
+to_left = False
 
 
 def set_player(img):
@@ -51,9 +52,9 @@ def mirror(img):
     return character
 
 
-# player = pygame.transform.scale(player_img, (player_img.get_width() * 4, player_img.get_height() * 4))
-
 player = set_player("stand.png")
+
+test_object = set_player("red.png")
 
 move_right = False
 move_left = False
@@ -66,15 +67,15 @@ momentum_y = 0
 
 # RECTangle (Collisions with objects : x, y, height, width)
 player_rect = pygame.Rect(player_location_x, player_location_y, player.get_width(), player.get_height())
-# object_rect = pygame.Rect(60, 60, 100, 100)
+test_object_rect = pygame.Rect(150, 450, 64, 64)
 
 # The Game Loop
 running = True
 while running:
 
     # Render the map
+    tile_rects = []
     y = 0
-
     for layer in game_map:
         x = 0
         for tile in layer:
@@ -88,6 +89,8 @@ while running:
                 display.blit(red_img, (x * 16, y * 16))
             if tile == 4:
                 display.blit(red_shadow, (x * 16, y * 16))
+            if tile != 0:
+                tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             x += 1
         y += 1
 
@@ -97,6 +100,13 @@ while running:
         player_location_x -= 4
     if move_jump:
         player_location_y -= 10
+
+    # Deal w/ collisions
+    if player_rect.colliderect(test_object_rect):
+        test_object = set_player("green.png")
+    else:
+        test_object = set_player("red.png")
+    ###########################
 
     player_rect.x = int(player_location_x)
     player_rect.y = int(player_location_y)
@@ -113,51 +123,9 @@ while running:
 
     player_location_y += momentum_y
 
-    if player_location_y < player.get_height():
-        screen.fill((0, 0, 0))
-    else:
-        screen.fill((0, 96, 184))
-
     # Background colour and image
     screen.fill((0, 96, 184))
     screen.blit(background, (0, 0))
-
-    # Collision detection!
-    # if player_rect.colliderect(object_rect):
-    #     pygame.draw.rect(screen, (255, 0, 0), object_rect)  # if touching => red
-    # else:
-    #     pygame.draw.rect(screen, (0, 0, 0), object_rect)  # if not touching => black
-
-    def collision_test(rect, tiles):
-        hit_list = []
-        for tile in tiles:
-            if rect.colliderect(tile):
-                hit_list.append(tile)
-        return hit_list
-
-
-    def move(rect, movement, tiles):
-        collision_types = {'top': False, 'bottom': False, 'right': False, 'left': False}
-        rect.x += movement[0]
-        hit_list = collision_test(rect, tiles)
-        for tile in hit_list:
-            if movement[0] > 0:
-                rect.right = tile.left
-                collision_types['right'] = True
-            elif movement[0] < 0:
-                rect.left = tile.right
-                collision_types['left'] = True
-        rect.y += movement[1]
-        hit_list = collision_test(rect, tiles)
-        for tile in hit_list:
-            if movement[1] > 0:
-                rect.bottom = tile.top
-                collision_types['bottom'] = True
-            elif movement[1] < 0:
-                rect.top = tile.bottom
-                collision_types['top'] = True
-        return rect, collision_types
-
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -202,6 +170,7 @@ while running:
 
     screen.blit(player, (int(player_location_x), int(player_location_y)))
     screen.blit(pygame.transform.scale(display, window_size), (0, 0))
+    screen.blit(test_object, (150, 450))
 
     pygame.display.update()
     clock.tick(60)
