@@ -1,21 +1,41 @@
 import pygame
-
 from pygame.locals import *
 
 clock = pygame.time.Clock()
 
 pygame.init()
 
-pygame.display.set_caption("MyGame")  # Title name
+pygame.display.set_caption("Platformer")
 
 window_size = (1280, 720)
 
-background = pygame.image.load("back.png")
+screen = pygame.display.set_mode(window_size)  # initiate the window
 
-screen = pygame.display.set_mode(window_size)
+display = pygame.Surface((320, 192))  # used as the surface for rendering, which is scaled
 
-# A new surface to render the tiles
-display = pygame.Surface((320, 192))
+moving_right = False
+moving_left = False
+vertical_momentum = 0
+air_timer = 0
+to_left = False
+
+game_map = [[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [6, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [3, 0, 0, 1, 1, 9, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+
+def mirror(img):
+    return pygame.transform.flip(img, True, False)
+
 
 pcb_img = pygame.image.load("pcb.png")
 green_img = pygame.image.load("green.png")
@@ -23,57 +43,48 @@ green_shadow = pygame.image.load("green_shadow.png")
 red_img = pygame.image.load("red.png")
 red_shadow = pygame.image.load("red_shadow.png")
 
-game_map = [[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1]]
+player_img = pygame.image.load('stand.png')
+player_stand = pygame.image.load('stand.png')
+player_walk = pygame.image.load('man.png')
+player_jump = pygame.image.load('jump.png')
 
-player_img = pygame.image.load("man.png")
-to_left = False
+player_rect = pygame.Rect(16, 100, 16, 32)
 
 
-def set_player(img):
-    picture = pygame.image.load(img)
-    character = pygame.transform.scale(picture, (picture.get_width() * 4, picture.get_height() * 4))
-    return character
+def collision_test(rect, tiles):
+    hit_list = []
+    for tile in tiles:
+        if rect.colliderect(tile):
+            hit_list.append(tile)
+    return hit_list
 
 
-def mirror(img):
-    picture = pygame.transform.flip(pygame.image.load(img), True, False)
-    character = pygame.transform.scale(picture, (picture.get_width() * 4, picture.get_height() * 4))
-    return character
+def move(rect, movement, tiles):
+    collision_types = {'top': False, 'bottom': False, 'right': False, 'left': False}
+    rect.x += int(movement[0])
+    hit_list = collision_test(rect, tiles)
+    for tile in hit_list:
+        if movement[0] > 0:
+            rect.right = tile.left
+            collision_types['right'] = True
+        elif movement[0] < 0:
+            rect.left = tile.right
+            collision_types['left'] = True
+    rect.y += int(movement[1])
+    hit_list = collision_test(rect, tiles)
+    for tile in hit_list:
+        if movement[1] > 0:
+            rect.bottom = tile.top
+            collision_types['bottom'] = True
+        elif movement[1] < 0:
+            rect.top = tile.bottom
+            collision_types['top'] = True
+    return rect, collision_types
 
 
-player = set_player("stand.png")
+while True:  # game loop
+    display.fill((0, 96, 184))  # clear screen by filling it with blue
 
-test_object = set_player("red.png")
-
-move_right = False
-move_left = False
-move_jump = False
-
-player_location_x = 64
-player_location_y = 64
-
-momentum_y = 0
-
-# RECTangle (Collisions with objects : x, y, height, width)
-player_rect = pygame.Rect(player_location_x, player_location_y, player.get_width(), player.get_height())
-test_object_rect = pygame.Rect(150, 450, 64, 64)
-
-# The Game Loop
-running = True
-while running:
-
-    # Render the map
     tile_rects = []
     y = 0
     for layer in game_map:
@@ -94,83 +105,66 @@ while running:
             x += 1
         y += 1
 
-    if move_right:
-        player_location_x += 4
-    if move_left:
-        player_location_x -= 4
-    if move_jump:
-        player_location_y -= 10
+    player_movement = [0, 0]
+    if moving_right == True:
+        player_movement[0] += 2
+    if moving_left == True:
+        player_movement[0] -= 2
+    player_movement[1] += vertical_momentum
+    vertical_momentum += 0.2
+    if vertical_momentum > 3:
+        vertical_momentum = 3
 
-    # Deal w/ collisions
-    if player_rect.colliderect(test_object_rect):
-        test_object = set_player("green.png")
+    player_rect, collisions = move(player_rect, player_movement, tile_rects)
+
+    if collisions["bottom"] == True:
+        air_timer = 0
+        vertical_momentum = 0
     else:
-        test_object = set_player("red.png")
-    ###########################
+        air_timer += 1
 
-    player_rect.x = int(player_location_x)
-    player_rect.y = int(player_location_y)
+    display.blit(player_img, (player_rect.x, player_rect.y))
 
-    if player_location_y > window_size[1] - player.get_height():
-        momentum_y = 0
-    else:
-        momentum_y += 0.25
-
-    if player_location_x > window_size[0] - player.get_height():
-        player_location_x = window_size[0] - player.get_height()
-    elif player_location_x < 0:
-        player_location_x = 0
-
-    player_location_y += momentum_y
-
-    # Background colour and image
-    screen.fill((0, 96, 184))
-    screen.blit(background, (0, 0))
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    for event in pygame.event.get():  # event loop
+        if event.type == QUIT:
+            pygame.quit()
 
         # Key press events & image changes
         if event.type == KEYDOWN:
             if event.key == K_RIGHT:
-                move_right = True
+                moving_right = True
                 to_left = False
-                player = set_player("man.png")
+                player_img = player_walk
 
             if event.key == K_LEFT:
-                move_left = True
+                moving_left = True
                 to_left = True
-                player = mirror("man.png")
+                player_img = mirror(player_walk)
 
             if event.key == K_SPACE:
-                move_jump = True
+                if air_timer < 6:
+                    vertical_momentum = -6
                 if to_left:
-                    player = mirror("jump.png")
+                    player_img = mirror(player_jump)
                 else:
-                    player = set_player("jump.png")
+                    player_img = player_jump
 
         if event.type == KEYUP:
             if event.key == K_RIGHT:
-                move_right = False
+                moving_right = False
                 to_left = False
-                player = set_player("stand.png")
+                player_img = player_stand
 
             if event.key == K_LEFT:
-                move_left = False
+                moving_left = False
                 to_left = True
-                player = mirror("stand.png")
-
+                player_img = mirror(player_stand)
             if event.key == K_SPACE:
-                move_jump = False
                 if to_left:
-                    player = mirror("stand.png")
+                    player_img = mirror(player_stand)
                 else:
-                    player = set_player("stand.png")
+                    player_img = player_stand
 
-    screen.blit(player, (int(player_location_x), int(player_location_y)))
     screen.blit(pygame.transform.scale(display, window_size), (0, 0))
-    screen.blit(test_object, (150, 450))
-
     pygame.display.update()
     clock.tick(60)
