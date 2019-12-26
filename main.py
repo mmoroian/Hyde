@@ -1,4 +1,5 @@
 import pygame
+import sys  # prevents Segmentation fault 11
 from pygame.locals import *
 
 clock = pygame.time.Clock()
@@ -19,18 +20,19 @@ vertical_momentum = 0
 air_timer = 0
 to_left = False
 
-game_map = [[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [6, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [3, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [3, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [3, 0, 0, 1, 1, 9, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+def load_map(file_name):
+    f = open(file_name, "r")  # "r" means read
+    data = f.read()
+    f.close()
+    data = data.split("\n")
+    level_map = []
+    for row in data:
+        level_map.append(list(row))  # converts the text-line to a list
+    return level_map
+
+
+game_map = load_map("level.txt")
 
 
 def mirror(img):
@@ -42,20 +44,21 @@ green_img = pygame.image.load("green.png")
 green_shadow = pygame.image.load("green_shadow.png")
 red_img = pygame.image.load("red.png")
 red_shadow = pygame.image.load("red_shadow.png")
+player_img = pygame.image.load("stand.png")
+player_stand = pygame.image.load("stand.png")
 
-player_img = pygame.image.load('stand.png')
-player_stand = pygame.image.load('stand.png')
-player_walk = pygame.image.load('man.png')
-player_jump = pygame.image.load('jump.png')
+player_walk = pygame.image.load("man.png")
+player_walk2 = pygame.image.load("man2.png")
+player_jump = pygame.image.load("jump.png")
 
 player_rect = pygame.Rect(16, 100, 16, 32)
 
 
 def collision_test(rect, tiles):
     hit_list = []
-    for tile in tiles:
-        if rect.colliderect(tile):
-            hit_list.append(tile)
+    for a_tile in tiles:
+        if rect.colliderect(a_tile):
+            hit_list.append(a_tile)
     return hit_list
 
 
@@ -63,63 +66,67 @@ def move(rect, movement, tiles):
     collision_types = {'top': False, 'bottom': False, 'right': False, 'left': False}
     rect.x += int(movement[0])
     hit_list = collision_test(rect, tiles)
-    for tile in hit_list:
+    for a_tile in hit_list:
         if movement[0] > 0:
-            rect.right = tile.left
+            rect.right = a_tile.left
             collision_types['right'] = True
         elif movement[0] < 0:
-            rect.left = tile.right
+            rect.left = a_tile.right
             collision_types['left'] = True
     rect.y += int(movement[1])
     hit_list = collision_test(rect, tiles)
-    for tile in hit_list:
+    for a_tile in hit_list:
         if movement[1] > 0:
-            rect.bottom = tile.top
+            rect.bottom = a_tile.top
             collision_types['bottom'] = True
         elif movement[1] < 0:
-            rect.top = tile.bottom
+            rect.top = a_tile.bottom
             collision_types['top'] = True
     return rect, collision_types
 
 
 while True:  # game loop
     display.fill((0, 96, 184))  # clear screen by filling it with blue
+    back_img = pygame.image.load("back.png")
+    display.blit(back_img, (0, 0))
 
     tile_rects = []
     y = 0
     for layer in game_map:
         x = 0
         for tile in layer:
-            if tile == 1:
+            if tile == '1':
                 display.blit(pcb_img, (x * 16, y * 16))
-            if tile == 6:
+            if tile == '6':
                 display.blit(green_img, (x * 16, y * 16))
-            if tile == 3:
+            if tile == '3':
                 display.blit(green_shadow, (x * 16, y * 16))
-            if tile == 9:
+            if tile == '9':
                 display.blit(red_img, (x * 16, y * 16))
-            if tile == 4:
+            if tile == '4':
                 display.blit(red_shadow, (x * 16, y * 16))
-            if tile != 0:
+            if tile != '0':
                 tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             x += 1
         y += 1
 
     player_movement = [0, 0]
-    if moving_right == True:
+    if moving_right:
         player_movement[0] += 2
-    if moving_left == True:
+
+    if moving_left:
         player_movement[0] -= 2
+
     player_movement[1] += vertical_momentum
-    vertical_momentum += 0.2
+    vertical_momentum += 0.25
     if vertical_momentum > 3:
         vertical_momentum = 3
 
     player_rect, collisions = move(player_rect, player_movement, tile_rects)
 
-    if collisions["bottom"] == True:
+    if collisions["bottom"]:
         air_timer = 0
-        vertical_momentum = 0
+        vertical_momentum = 5
     else:
         air_timer += 1
 
@@ -128,6 +135,7 @@ while True:  # game loop
     for event in pygame.event.get():  # event loop
         if event.type == QUIT:
             pygame.quit()
+            sys.exit()  # prevents Segmentation fault 11
 
         # Key press events & image changes
         if event.type == KEYDOWN:
