@@ -22,6 +22,12 @@ air_timer = 0
 to_left = False
 walkCount = 0
 
+money = 0
+
+# Status Bar
+
+
+
 # Scrolling x & y for camera
 scroll = [0, 0]
 
@@ -164,7 +170,8 @@ while True:  # game loop
                     cashRect.y = (y * 16 - int(scroll[1]))
                     display.blit(cash, cashRect)
                 if player_rect.colliderect(cashRect):
-                    print('colliding !')
+                    money += 100
+                    print("Money: " + str(money))
                     index = layer.index(tile)
                     layer[index] = '0'
                     b = True
