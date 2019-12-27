@@ -16,9 +16,11 @@ display = pygame.Surface((320, 192))  # used as the surface for rendering, which
 
 moving_right = False
 moving_left = False
+jump = False
 vertical_momentum = 0
 air_timer = 0
 to_left = False
+walkCount = 0
 
 # Scrolling x & y for camera
 scroll = [0, 0]
@@ -35,12 +37,6 @@ def load_map(file_name):
     return level_map
 
 
-# defined global variable
-global 
-def load_animation(file, frames):
-
-
-
 game_map = load_map("level.txt")
 
 
@@ -53,12 +49,21 @@ green_img = pygame.image.load("green.png")
 green_shadow = pygame.image.load("green_shadow.png")
 red_img = pygame.image.load("red.png")
 red_shadow = pygame.image.load("red_shadow.png")
+
+# Player image load
 player_img = pygame.image.load("stand.png")
 player_stand = pygame.image.load("stand.png")
-
 player_walk = pygame.image.load("man.png")
 player_walk2 = pygame.image.load("man2.png")
 player_jump = pygame.image.load("jump.png")
+
+walk_list = [pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png'),
+             pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png'),
+             pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png')]
+
+walk_left = []
+for i in walk_list:
+    walk_left.append(mirror(i))
 
 player_rect = pygame.Rect(32, 100, 16, 32)
 
@@ -94,6 +99,34 @@ def move(rect, movement, tiles):
     return rect, collision_types
 
 
+def redrawGameWindow():
+    global walkCount
+
+    if walkCount + 1 >= 27:
+        walkCount = 0
+
+    if moving_right:
+        display.blit(walk_list[walkCount // 3], (player_rect.x - int(scroll[0]), player_rect.y - int(scroll[1])))
+        walkCount += 1
+    elif moving_left:
+        display.blit(walk_left[walkCount // 3], (player_rect.x - int(scroll[0]), player_rect.y - int(scroll[1])))
+        walkCount += 1
+    elif jump:
+        if to_left:
+            display.blit(mirror(player_jump), (player_rect.x - int(scroll[0]), player_rect.y - int(scroll[1])))
+        else:
+            display.blit(player_jump, (player_rect.x - int(scroll[0]), player_rect.y - int(scroll[1])))
+        walkCount = 0
+    else:
+        if to_left:
+            display.blit(mirror(player_stand), (player_rect.x - int(scroll[0]), player_rect.y - int(scroll[1])))
+        else:
+            display.blit(player_stand, (player_rect.x - int(scroll[0]), player_rect.y - int(scroll[1])))
+        walkCount = 0
+
+    pygame.display.update()
+
+
 while True:  # game loop
     display.fill((0, 96, 184))  # clear screen by filling it with blue
     back_img = pygame.image.load("back.png")
@@ -101,11 +134,10 @@ while True:  # game loop
 
     # Scroll with lag
     if player_rect.x > 32:
-        scroll[0] += (player_rect.x - scroll[0]-64)/16
+        scroll[0] += (player_rect.x - scroll[0] - 64) / 16
 
     if player_rect.y > 144:
-        scroll[1] += (player_rect.y - scroll[1]-144)/16  # vertical scrolling
-
+        scroll[1] += (player_rect.y - scroll[1] - 144) / 16  # vertical scrolling
 
     tile_rects = []
     y = 0
@@ -147,7 +179,7 @@ while True:  # game loop
     else:
         air_timer += 1
 
-    display.blit(player_img, (player_rect.x - scroll[0], player_rect.y - scroll[1]))
+    # display.blit(player_img, (player_rect.x - int(scroll[0]), player_rect.y - int(scroll[1])))
 
     for event in pygame.event.get():  # event loop
         if event.type == QUIT:
@@ -159,37 +191,44 @@ while True:  # game loop
             if event.key == K_RIGHT:
                 moving_right = True
                 to_left = False
-                player_img = player_walk
+                # player_img = player_walk
 
             if event.key == K_LEFT:
                 moving_left = True
                 to_left = True
-                player_img = mirror(player_walk)
+                # player_img = mirror(player_walk)
 
             if event.key == K_SPACE:
                 if air_timer < 6:
                     vertical_momentum = -6
-                if to_left:
-                    player_img = mirror(player_jump)
-                else:
-                    player_img = player_jump
+                    jump = True
+                # if to_left:
+                # player_img = mirror(player_jump)
+                # else:
+                # player_img = player_jump
 
         if event.type == KEYUP:
             if event.key == K_RIGHT:
                 moving_right = False
                 to_left = False
-                player_img = player_stand
+                # player_img = player_stand
+                walkCount = 0
 
             if event.key == K_LEFT:
                 moving_left = False
                 to_left = True
-                player_img = mirror(player_stand)
-            if event.key == K_SPACE:
-                if to_left:
-                    player_img = mirror(player_stand)
-                else:
-                    player_img = player_stand
+                # player_img = mirror(player_stand)
+                walkCount = 0
 
+            if event.key == K_SPACE:
+                jump = False
+                # if to_left:
+                #    player_img = mirror(player_stand)
+                # else:
+                #    player_img = player_stand
+                walkCount = 0
+
+    redrawGameWindow()
     screen.blit(pygame.transform.scale(display, window_size), (0, 0))
     pygame.display.update()
     clock.tick(60)
