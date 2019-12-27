@@ -51,7 +51,6 @@ red_img = pygame.image.load("red.png")
 red_shadow = pygame.image.load("red_shadow.png")
 cash = pygame.image.load("cash.png")
 
-
 # Player image load
 player_img = pygame.image.load("stand.png")
 player_stand = pygame.image.load("stand.png")
@@ -157,8 +156,20 @@ while True:  # game loop
             if tile == '4':
                 display.blit(red_shadow, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '$':
+                b = False
+                cash = pygame.image.load("cash.png")
+                cashRect = cash.get_rect()
+                if tile == '$' and not b:
+                    cashRect.x = (x * 16 - int(scroll[0]))
+                    cashRect.y = (y * 16 - int(scroll[1]))
+                    display.blit(cash, cashRect)
+                if player_rect.colliderect(cashRect):
+                    print('colliding !')
+                    index = layer.index(tile)
+                    layer[index] = '0'
+                    b = True
                 display.blit(cash, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
-            if tile != '0':
+            if tile != '0' and tile != '$':
                 tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             x += 1
         y += 1
