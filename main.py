@@ -20,6 +20,9 @@ vertical_momentum = 0
 air_timer = 0
 to_left = False
 
+# Scrolling x & y for camera
+scroll = [0, 0]
+
 
 def load_map(file_name):
     f = open(file_name, "r")  # "r" means read
@@ -30,6 +33,12 @@ def load_map(file_name):
     for row in data:
         level_map.append(list(row))  # converts the text-line to a list
     return level_map
+
+
+# defined global variable
+global 
+def load_animation(file, frames):
+
 
 
 game_map = load_map("level.txt")
@@ -51,7 +60,7 @@ player_walk = pygame.image.load("man.png")
 player_walk2 = pygame.image.load("man2.png")
 player_jump = pygame.image.load("jump.png")
 
-player_rect = pygame.Rect(16, 100, 16, 32)
+player_rect = pygame.Rect(32, 100, 16, 32)
 
 
 def collision_test(rect, tiles):
@@ -90,21 +99,29 @@ while True:  # game loop
     back_img = pygame.image.load("back.png")
     display.blit(back_img, (0, 0))
 
+    # Scroll with lag
+    if player_rect.x > 32:
+        scroll[0] += (player_rect.x - scroll[0]-64)/16
+
+    if player_rect.y > 144:
+        scroll[1] += (player_rect.y - scroll[1]-144)/16  # vertical scrolling
+
+
     tile_rects = []
     y = 0
     for layer in game_map:
         x = 0
         for tile in layer:
             if tile == '1':
-                display.blit(pcb_img, (x * 16, y * 16))
+                display.blit(pcb_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '6':
-                display.blit(green_img, (x * 16, y * 16))
+                display.blit(green_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '3':
-                display.blit(green_shadow, (x * 16, y * 16))
+                display.blit(green_shadow, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '9':
-                display.blit(red_img, (x * 16, y * 16))
+                display.blit(red_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '4':
-                display.blit(red_shadow, (x * 16, y * 16))
+                display.blit(red_shadow, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile != '0':
                 tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             x += 1
@@ -130,7 +147,7 @@ while True:  # game loop
     else:
         air_timer += 1
 
-    display.blit(player_img, (player_rect.x, player_rect.y))
+    display.blit(player_img, (player_rect.x - scroll[0], player_rect.y - scroll[1]))
 
     for event in pygame.event.get():  # event loop
         if event.type == QUIT:
