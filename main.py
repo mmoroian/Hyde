@@ -25,7 +25,12 @@ walkCount = 0
 money = 0
 
 # Status Bar
+# font = pygame.font.SysFont("Helvetica, Arial", 14)
+# text = ()
 
+
+# def print_bar(num):
+#    return font.render("Cash collected: $" + str(num), True, (0, 0, 0))
 
 
 # Scrolling x & y for camera
@@ -134,10 +139,13 @@ def redrawGameWindow():
     pygame.display.update()
 
 
-while True:  # game loop
+# The game loop
+while True:
     display.fill((0, 96, 184))  # clear screen by filling it with blue
     back_img = pygame.image.load("back.png")
     display.blit(back_img, (0, 0))
+
+    # display.blit(text, ((display.get_width() / 2 - text.get_rect().width / 2), (display.get_height() / 2 - 90)))
 
     # Scroll with lag
     if player_rect.x > 32:
@@ -166,16 +174,19 @@ while True:  # game loop
                 cash = pygame.image.load("cash.png")
                 cashRect = cash.get_rect()
                 if tile == '$' and not b:
-                    cashRect.x = (x * 16 - int(scroll[0]))
-                    cashRect.y = (y * 16 - int(scroll[1]))
-                    display.blit(cash, cashRect)
+                    cashRect.x = (x * 16)
+                    cashRect.y = (y * 16)
                 if player_rect.colliderect(cashRect):
                     money += 100
                     print("Money: " + str(money))
+                    # text = print_bar(money)
+                    # display.blit(text, ((display.get_width() / 2 - text.get_rect().width / 2), (display.get_height() / 2 - 90)))
+
                     index = layer.index(tile)
                     layer[index] = '0'
                     b = True
                 display.blit(cash, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
+
             if tile != '0' and tile != '$':
                 tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             x += 1
