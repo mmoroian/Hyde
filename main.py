@@ -49,6 +49,8 @@ green_img = pygame.image.load("green.png")
 green_shadow = pygame.image.load("green_shadow.png")
 red_img = pygame.image.load("red.png")
 red_shadow = pygame.image.load("red_shadow.png")
+cash = pygame.image.load("cash.png")
+
 
 # Player image load
 player_img = pygame.image.load("stand.png")
@@ -154,6 +156,8 @@ while True:  # game loop
                 display.blit(red_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '4':
                 display.blit(red_shadow, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
+            if tile == '$':
+                display.blit(cash, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile != '0':
                 tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             x += 1
