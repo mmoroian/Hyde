@@ -59,7 +59,7 @@ pcb_img = pygame.image.load("pcb.png")
 green_img = pygame.image.load("green.png")
 green_shadow = pygame.image.load("green_shadow.png")
 red_img = pygame.image.load("red.png")
-red_shadow = pygame.image.load("red_shadow.png")
+red_shadow = pygame.image.load("red_shadow2.png")
 cash = pygame.image.load("cash.png")
 
 # Player image load
@@ -69,9 +69,7 @@ player_walk = pygame.image.load("man.png")
 player_walk2 = pygame.image.load("man2.png")
 player_jump = pygame.image.load("jump.png")
 
-walk_list = [pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png'),
-             pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png'),
-             pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png')]
+walk_list = [pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png')]
 
 walk_left = []
 for i in walk_list:
@@ -84,6 +82,9 @@ def collision_test(rect, tiles):
     hit_list = []
     for a_tile in tiles:
         if rect.colliderect(a_tile):
+            #print('TOP LEFT {}'.format(a_tile.top))
+            #print('heigh {}'.format(a_tile.height))
+            #print('COORDS of PERSON are X:{} X2:{} and of TILE are X:{} X2:{}'.format(rect.bottom,rect.top,a_tile.top,a_tile.bottom))
             hit_list.append(a_tile)
     return hit_list
 
@@ -114,7 +115,7 @@ def move(rect, movement, tiles):
 def redrawGameWindow():
     global walkCount
 
-    if walkCount + 1 >= 27:
+    if walkCount + 1 >= 9:
         walkCount = 0
 
     if moving_right:
@@ -138,13 +139,14 @@ def redrawGameWindow():
 
     pygame.display.update()
 
-text = font.render("SCORE:",0,(0,0,0))
 
 # The game loop
 while True:
     display.fill((0, 96, 184))  # clear screen by filling it with blue
     back_img = pygame.image.load("back.png")
     display.blit(back_img, (0, 0))
+
+    text = font.render("BALANCE: $" + str(money),0,(0,0,0))
     display.blit(text,(220,10))
 
     # display.blit(text, ((display.get_width() / 2 - text.get_rect().width / 2), (display.get_height() / 2 - 90)))
@@ -169,7 +171,8 @@ while True:
             if tile == '9':
                 display.blit(red_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '4':
-                display.blit(red_shadow, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
+                display.blit(red_shadow, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
+                tile_rects.append(pygame.Rect(x* 16 +7 , y * 16, 1, 16))
             if tile == '$':
                 b = False
                 cash = pygame.image.load("cash.png")
@@ -188,8 +191,12 @@ while True:
                     b = True
                 display.blit(cash, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
 
-            if tile != '0' and tile != '$':
+            if tile != '0' and tile != '$' and tile !=  '4':
+                #if tile == '4':
+                #    tile_rects.append(pygame.Rect( x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]), 1, 16))
+                #else:
                 tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
+                    #tile_rects.append(pygame.Rect( x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]), 1, 16))
             x += 1
         y += 1
 
