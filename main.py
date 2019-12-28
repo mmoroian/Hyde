@@ -25,7 +25,7 @@ walkCount = 0
 money = 0
 
 # Status Bar
-# font = pygame.font.SysFont("Helvetica, Arial", 14)
+font = pygame.font.SysFont("Helvetica, Arial", 14)
 # text = ()
 
 
@@ -138,15 +138,16 @@ def redrawGameWindow():
 
     pygame.display.update()
 
+text = font.render("SCORE:",0,(0,0,0))
 
 # The game loop
 while True:
     display.fill((0, 96, 184))  # clear screen by filling it with blue
     back_img = pygame.image.load("back.png")
     display.blit(back_img, (0, 0))
+    display.blit(text,(220,10))
 
     # display.blit(text, ((display.get_width() / 2 - text.get_rect().width / 2), (display.get_height() / 2 - 90)))
-
     # Scroll with lag
     if player_rect.x > 32:
         scroll[0] += (player_rect.x - scroll[0] - 64) / 16
