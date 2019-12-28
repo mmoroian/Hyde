@@ -2,11 +2,19 @@ import pygame
 import sys  # prevents Segmentation fault 11
 from pygame.locals import *
 
-clock = pygame.time.Clock()
 
 pygame.init()
+pygame.mixer.init()  # Initialize music and sounds
 
-pygame.display.set_caption("Platformer")
+# Load Sound and Music
+money_collect = pygame.mixer.Sound("money.wav")  # only WAV is supported as Sound
+pygame.mixer.music.load("loop1.wav")
+# Loop music forever -1
+pygame.mixer.music.play(-1)
+
+clock = pygame.time.Clock()
+
+pygame.display.set_caption("Hyde's Journey")
 
 window_size = (1280, 720)
 
@@ -25,8 +33,8 @@ walkCount = 0
 money = 0
 
 # Status Bar
-font = pygame.font.SysFont("Helvetica, Arial", 14)
-# text = ()
+# font = pygame.font.SysFont("Helvetica, Arial", 14)
+font = pygame.font.Font("vga8.ttf", 16)
 
 
 # def print_bar(num):
@@ -58,9 +66,13 @@ def mirror(img):
 pcb_img = pygame.image.load("pcb.png")
 green_img = pygame.image.load("green.png")
 green_shadow = pygame.image.load("green_shadow.png")
+green_shadow_short = pygame.image.load("green_shadow_short.png")
 red_img = pygame.image.load("red.png")
 red_shadow = pygame.image.load("red_shadow.png")
-cash = pygame.image.load("cash.png")
+red_shadow_short = pygame.image.load("red_shadow_short.png")
+# cash = pygame.image.load("cash.png")
+doji_green =  pygame.image.load("doji_green.png")
+doji_red =  pygame.image.load("doji_red.png")
 
 # Player image load
 player_img = pygame.image.load("stand.png")
@@ -75,7 +87,7 @@ walk_left = []
 for i in walk_list:
     walk_left.append(mirror(i))
 
-player_rect = pygame.Rect(32, 100, 16, 32)
+player_rect = pygame.Rect(32, 290, 16, 32)
 
 
 def collision_test(rect, tiles):
@@ -146,26 +158,27 @@ while True:
     back_img = pygame.image.load("city.png")
     display.blit(back_img, (0, 0))
 
-    text = font.render("BALANCE: $" + str(money),0,(0,0,0))
-    display.blit(text,(220,10))
 
     # display.blit(text, ((display.get_width() / 2 - text.get_rect().width / 2), (display.get_height() / 2 - 90)))
     # Scroll with lag
     if player_rect.x > 32:
         scroll[0] += (player_rect.x - scroll[0] - 64) / 16
 
-    if player_rect.y > 144:
+    #if player_rect.y > 1 44:
+    if player_rect.y == 272 :
         scroll[1] += (player_rect.y - scroll[1] - 144) / 16  # vertical scrolling
-
+    if player_rect.y < 170  or moving_left:
+        #print('Y is {}'.format(player_rect.y))
+        scroll[1] += (player_rect.y - scroll[1] - 72) / 36  # vertical scrolling
     tile_rects = []
     y = 0
     for layer in game_map:
         x = 0
-        for tile in layer:
+        for idx, tile in enumerate(layer):
             if tile == '1':
                 display.blit(pcb_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '6':
-                display.blit(green_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
+                display.blit(green_img, (x * 16 - int(scroll[0]) , y * 16 - int(scroll[1])))
             if tile == '3':
                 display.blit(green_shadow, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
                 tile_rects.append(pygame.Rect(x * 16 + 7, y * 16, 1, 16))
@@ -174,6 +187,26 @@ while True:
             if tile == '4':
                 display.blit(red_shadow, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
                 tile_rects.append(pygame.Rect(x * 16 + 7, y * 16, 1, 16))
+            if tile == '5':
+                if layer[idx-1] != '0':
+                    display.blit(red_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) ))
+                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))  
+                else:
+                    display.blit(red_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) + 8))
+                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))  
+            if tile == '7':
+                if layer[idx-1] != '0':
+                    display.blit(green_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) ))
+                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))      
+                else:
+                    display.blit(green_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) + 8))
+                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))
+            if tile == '8':
+                display.blit(doji_red, (x * 16 - int(scroll[0]) , y * 16 - int(scroll[1]) ))
+                tile_rects.append(pygame.Rect(x * 16 , y * 16 , 16, 16))
+            if tile == '2':
+                display.blit(doji_green, (x * 16 - int(scroll[0]) , y * 16 - int(scroll[1]) ))
+                tile_rects.append(pygame.Rect(x * 16 , y * 16 , 16, 16))                             
             if tile == '$':
                 b = False
                 cash = pygame.image.load("money16.png")
@@ -183,6 +216,7 @@ while True:
                     cashRect.y = (y * 16)
                 if player_rect.colliderect(cashRect):
                     money += 100
+                    money_collect.play()
                     print("Money: " + str(money))
                     # text = print_bar(money)
                     # display.blit(text, ((display.get_width() / 2 - text.get_rect().width / 2), (display.get_height() / 2 - 90)))
@@ -192,7 +226,7 @@ while True:
                     b = True
                 display.blit(cash, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
 
-            if tile != '0' and tile != '$' and tile != '4' and tile != '3':
+            if tile != '0' and tile != '$' and tile != '4' and tile != '3' and tile != '5' and tile != '7' and tile != '8' and tile != '2':
                 #if tile == '4':
                 #    tile_rects.append(pygame.Rect( x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]), 1, 16))
                 #else:
@@ -201,6 +235,8 @@ while True:
             x += 1
         y += 1
 
+    text = font.render("BALANCE: $ " + str(money), 0, (0, 0, 0))
+    display.blit(text, (200, 10))
     player_movement = [0, 0]
     if moving_right:
         player_movement[0] += 2
@@ -242,7 +278,7 @@ while True:
 
             if event.key == K_SPACE:
                 if air_timer < 6:
-                    vertical_momentum = -6
+                    vertical_momentum = -5.5
                     jump = True
                 # if to_left:
                 # player_img = mirror(player_jump)
