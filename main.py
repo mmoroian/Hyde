@@ -59,7 +59,7 @@ pcb_img = pygame.image.load("pcb.png")
 green_img = pygame.image.load("green.png")
 green_shadow = pygame.image.load("green_shadow.png")
 red_img = pygame.image.load("red.png")
-red_shadow = pygame.image.load("red_shadow2.png")
+red_shadow = pygame.image.load("red_shadow.png")
 cash = pygame.image.load("cash.png")
 
 # Player image load
@@ -142,8 +142,8 @@ def redrawGameWindow():
 
 # The game loop
 while True:
-    display.fill((0, 96, 184))  # clear screen by filling it with blue
-    back_img = pygame.image.load("back.png")
+    display.fill((250, 250, 255))  # clear screen by filling it with blue
+    back_img = pygame.image.load("city.png")
     display.blit(back_img, (0, 0))
 
     text = font.render("BALANCE: $" + str(money),0,(0,0,0))
@@ -167,15 +167,16 @@ while True:
             if tile == '6':
                 display.blit(green_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '3':
-                display.blit(green_shadow, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
+                display.blit(green_shadow, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
+                tile_rects.append(pygame.Rect(x * 16 + 7, y * 16, 1, 16))
             if tile == '9':
                 display.blit(red_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '4':
                 display.blit(red_shadow, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
-                tile_rects.append(pygame.Rect(x* 16 +7 , y * 16, 1, 16))
+                tile_rects.append(pygame.Rect(x * 16 + 7, y * 16, 1, 16))
             if tile == '$':
                 b = False
-                cash = pygame.image.load("cash.png")
+                cash = pygame.image.load("money16.png")
                 cashRect = cash.get_rect()
                 if tile == '$' and not b:
                     cashRect.x = (x * 16)
@@ -191,7 +192,7 @@ while True:
                     b = True
                 display.blit(cash, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
 
-            if tile != '0' and tile != '$' and tile !=  '4':
+            if tile != '0' and tile != '$' and tile != '4' and tile != '3':
                 #if tile == '4':
                 #    tile_rects.append(pygame.Rect( x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]), 1, 16))
                 #else:
