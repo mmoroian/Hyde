@@ -2,7 +2,6 @@ import pygame
 import sys  # prevents Segmentation fault 11
 from pygame.locals import *
 
-
 pygame.init()
 pygame.mixer.init()  # Initialize music and sounds
 
@@ -10,7 +9,7 @@ pygame.mixer.init()  # Initialize music and sounds
 money_collect = pygame.mixer.Sound("money.wav")  # only WAV is supported as Sound
 pygame.mixer.music.load("loop1.wav")
 # Loop music forever -1
-pygame.mixer.music.play(-1)
+#pygame.mixer.music.play(-1)
 
 clock = pygame.time.Clock()
 
@@ -25,7 +24,6 @@ display = pygame.Surface((320, 192))  # used as the surface for rendering, which
 # Menu screen
 menu_screen = pygame.Surface((320, 192))
 
-
 moving_right = False
 moving_left = False
 jump = False
@@ -39,7 +37,6 @@ money = 0
 # Status Bar
 # font = pygame.font.SysFont("Helvetica, Arial", 14)
 font = pygame.font.Font("vga8.ttf", 16)
-
 
 # def print_bar(num):
 #    return font.render("Cash collected: $" + str(num), True, (0, 0, 0))
@@ -75,8 +72,8 @@ red_img = pygame.image.load("red.png")
 red_shadow = pygame.image.load("red_shadow.png")
 red_shadow_short = pygame.image.load("red_shadow_short.png")
 # cash = pygame.image.load("cash.png")
-doji_green =  pygame.image.load("doji_green.png")
-doji_red =  pygame.image.load("doji_red.png")
+doji_green = pygame.image.load("doji_green.png")
+doji_red = pygame.image.load("doji_red.png")
 
 # Player image load
 player_img = pygame.image.load("stand.png")
@@ -84,6 +81,10 @@ player_stand = pygame.image.load("stand.png")
 player_walk = pygame.image.load("man.png")
 player_walk2 = pygame.image.load("man2.png")
 player_jump = pygame.image.load("jump.png")
+
+# Logo
+logo = pygame.image.load("logo0.png")
+
 
 walk_list = [pygame.image.load('man.png'), pygame.image.load('stand.png'), pygame.image.load('man2.png')]
 
@@ -98,9 +99,9 @@ def collision_test(rect, tiles):
     hit_list = []
     for a_tile in tiles:
         if rect.colliderect(a_tile):
-            #print('TOP LEFT {}'.format(a_tile.top))
-            #print('heigh {}'.format(a_tile.height))
-            #print('COORDS of PERSON are X:{} X2:{} and of TILE are X:{} X2:{}'.format(rect.bottom,rect.top,a_tile.top,a_tile.bottom))
+            # print('TOP LEFT {}'.format(a_tile.top))
+            # print('heigh {}'.format(a_tile.height))
+            # print('COORDS of PERSON are X:{} X2:{} and of TILE are X:{} X2:{}'.format(rect.bottom,rect.top,a_tile.top,a_tile.bottom))
             hit_list.append(a_tile)
     return hit_list
 
@@ -155,41 +156,49 @@ def redrawGameWindow():
 
     pygame.display.update()
 
-flag = 0 
+
+# Render multiple line text
+def render_multi_line(txt, xp, yp, f_size):
+    lines = txt.splitlines()
+    for i, l in enumerate(lines):
+        menu_screen.blit(font.render(l, 0, (241, 35, 9)), (xp, yp + f_size * i))
+
+
+flag = False
 
 # The game loop
 while True:
 
     while not flag:
-        menu_screen.fill((0, 0, 0))
-        menu = font.render("Hyde's Journey. Press Enter to Start", 0, (255, 255, 255))
-        menu_screen.blit(menu, (10, 10))
+        menu_screen.fill((230, 230, 230))
+        #menu = font.render("Hyde's Journey. Press Enter to Start", 0, (255, 255, 255))
+        #menu_screen.blit(menu, (10, 10))
+        render_multi_line("Press ENTER\n to start.", 116, 150, 16)
+        menu_screen.blit(logo, (67, 10))  # Render the logo in the middle
         screen.blit(pygame.transform.scale(menu_screen, window_size), (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == KEYDOWN:
-                flag = 1
-    #if event.type == KEYDOWN:
+                if event.key == K_RETURN:
+                    flag = True
+                    pygame.mixer.music.play(-1)
+    # if event.type == KEYDOWN:
     #    if event.key == K_RETURN:
-
-
-
 
     display.fill((250, 250, 255))  # clear screen by filling it with blue
     back_img = pygame.image.load("city.png")
     display.blit(back_img, (0, 0))
-
 
     # display.blit(text, ((display.get_width() / 2 - text.get_rect().width / 2), (display.get_height() / 2 - 90)))
     # Scroll with lag
     if player_rect.x > 32:
         scroll[0] += (player_rect.x - scroll[0] - 64) / 16
 
-    #if player_rect.y > 1 44:
-    if player_rect.y == 272 :
+    # if player_rect.y > 1 44:
+    if player_rect.y == 272:
         scroll[1] += (player_rect.y - scroll[1] - 144) / 16  # vertical scrolling
-    if player_rect.y < 170  or moving_left:
-        #print('Y is {}'.format(player_rect.y))
+    if player_rect.y < 170 or moving_left:
+        # print('Y is {}'.format(player_rect.y))
         scroll[1] += (player_rect.y - scroll[1] - 72) / 36  # vertical scrolling
     tile_rects = []
     y = 0
@@ -199,7 +208,7 @@ while True:
             if tile == '1':
                 display.blit(pcb_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '6':
-                display.blit(green_img, (x * 16 - int(scroll[0]) , y * 16 - int(scroll[1])))
+                display.blit(green_img, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
             if tile == '3':
                 display.blit(green_shadow, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
                 tile_rects.append(pygame.Rect(x * 16 + 7, y * 16, 1, 16))
@@ -209,25 +218,25 @@ while True:
                 display.blit(red_shadow, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
                 tile_rects.append(pygame.Rect(x * 16 + 7, y * 16, 1, 16))
             if tile == '5':
-                if layer[idx-1] != '0':
-                    display.blit(red_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) ))
-                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))  
+                if layer[idx - 1] != '0':
+                    display.blit(red_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
+                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))
                 else:
                     display.blit(red_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) + 8))
-                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))  
+                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))
             if tile == '7':
-                if layer[idx-1] != '0':
-                    display.blit(green_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) ))
-                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))      
+                if layer[idx - 1] != '0':
+                    display.blit(green_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1])))
+                    tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))
                 else:
                     display.blit(green_shadow_short, (x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]) + 8))
                     tile_rects.append(pygame.Rect(x * 16 + 7, y * 16 + 8, 1, 8))
             if tile == '8':
-                display.blit(doji_red, (x * 16 - int(scroll[0]) , y * 16 - int(scroll[1]) ))
-                tile_rects.append(pygame.Rect(x * 16 , y * 16 , 16, 16))
+                display.blit(doji_red, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
+                tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             if tile == '2':
-                display.blit(doji_green, (x * 16 - int(scroll[0]) , y * 16 - int(scroll[1]) ))
-                tile_rects.append(pygame.Rect(x * 16 , y * 16 , 16, 16))                             
+                display.blit(doji_green, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
+                tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
             if tile == '$':
                 b = False
                 cash = pygame.image.load("money16.png")
@@ -248,11 +257,11 @@ while True:
                 display.blit(cash, (x * 16 - int(scroll[0]), y * 16 - int(scroll[1])))
 
             if tile != '0' and tile != '$' and tile != '4' and tile != '3' and tile != '5' and tile != '7' and tile != '8' and tile != '2':
-                #if tile == '4':
+                # if tile == '4':
                 #    tile_rects.append(pygame.Rect( x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]), 1, 16))
-                #else:
+                # else:
                 tile_rects.append(pygame.Rect(x * 16, y * 16, 16, 16))
-                    #tile_rects.append(pygame.Rect( x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]), 1, 16))
+                # tile_rects.append(pygame.Rect( x * 16 - int(scroll[0]) + 7, y * 16 - int(scroll[1]), 1, 16))
             x += 1
         y += 1
 
