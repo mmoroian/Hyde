@@ -22,6 +22,10 @@ screen = pygame.display.set_mode(window_size)  # initiate the window
 
 display = pygame.Surface((320, 192))  # used as the surface for rendering, which is scaled
 
+# Menu screen
+menu_screen = pygame.Surface((320, 192))
+
+
 moving_right = False
 moving_left = False
 jump = False
@@ -154,6 +158,20 @@ def redrawGameWindow():
 
 # The game loop
 while True:
+    #menu_screen.fill((0, 0, 0))
+    #menu = font.render("Hyde's Journey\nPress Enter to Start", 0, (255, 255, 255))
+    #menu_screen.blit(menu, (10, 10))
+
+    #screen.blit(pygame.transform.scale(menu_screen, window_size), (0, 0))
+
+
+    #pygame.display.update()
+    #if event.type == KEYDOWN:
+    #    if event.key == K_RETURN:
+
+
+
+
     display.fill((250, 250, 255))  # clear screen by filling it with blue
     back_img = pygame.image.load("city.png")
     display.blit(back_img, (0, 0))
