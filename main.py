@@ -155,17 +155,20 @@ def redrawGameWindow():
 
     pygame.display.update()
 
+flag = 0 
 
 # The game loop
 while True:
-    #menu_screen.fill((0, 0, 0))
-    #menu = font.render("Hyde's Journey\nPress Enter to Start", 0, (255, 255, 255))
-    #menu_screen.blit(menu, (10, 10))
 
-    #screen.blit(pygame.transform.scale(menu_screen, window_size), (0, 0))
-
-
-    #pygame.display.update()
+    while not flag:
+        menu_screen.fill((0, 0, 0))
+        menu = font.render("Hyde's Journey. Press Enter to Start", 0, (255, 255, 255))
+        menu_screen.blit(menu, (10, 10))
+        screen.blit(pygame.transform.scale(menu_screen, window_size), (0, 0))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == KEYDOWN:
+                flag = 1
     #if event.type == KEYDOWN:
     #    if event.key == K_RETURN:
 
