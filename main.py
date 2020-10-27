@@ -181,7 +181,7 @@ while True:
             if event.type == KEYDOWN:
                 if event.key == K_RETURN:
                     flag = True
-                    pygame.mixer.music.play(-1)
+                    #pygame.mixer.music.play(-1)  # loop music
     # if event.type == KEYDOWN:
     #    if event.key == K_RETURN:
 
@@ -308,7 +308,7 @@ while True:
 
             if event.key == K_SPACE:
                 if air_timer < 6:
-                    vertical_momentum = -5.5
+                    vertical_momentum = -5
                     jump = True
                 # if to_left:
                 # player_img = mirror(player_jump)
